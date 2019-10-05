@@ -1,8 +1,9 @@
 version: '3'
 services:
   app:
-    container_name: docker-node-mongo
+    container_name: docker-nodejs-mongo
     restart: always
+    # Will look at the current directory for the Dockerfile
     build: .
     ports:
       - '80:3000'
@@ -10,6 +11,10 @@ services:
       - mongo
   mongo:
     container_name: mongo
-    image: mongo
+    image: mongo:latest
     ports:
       - '27017:27017'
+    volumes:
+      - mongodata:/data/db
+volumes:
+  mongodata:
