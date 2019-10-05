@@ -1,18 +1,22 @@
 {
-  "name": "docker-node-mongo",
+  "name": "micro-web-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "A microservice web application for my master thesis.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JohnRLuther/micro-web-app.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JohnRLuther/micro-web-app/issues"
+  },
+  "homepage": "https://github.com/JohnRLuther/micro-web-app#readme",
   "dependencies": {
-    "body-parser": "^1.18.3",
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
-    "mongoose": "^5.2.7"
+    "express": "^4.17.1"
   }
 }
