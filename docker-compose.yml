@@ -1,20 +1,51 @@
 version: '3'
 services:
-  app:
-    container_name: docker-nodejs-mongo
-    restart: always
-    # Will look at the current directory for the Dockerfile
-    build: .
+  web:
+    build: './web'
     ports:
-      - '80:3000'
-    links:
-      - mongo
-  mongo:
-    container_name: mongo
-    image: mongo:latest
+      - "3000:3000"
+
+  search:
+    build: './search'
     ports:
-      - '27017:27017'
+      - "3001:3000"
+    depends_on:
+      - db
+    environment:
+      - MONGO_DB_URI=mongodb://db/microservices
+
+  books:
+    build: './books'
+    ports:
+      - "3002:3000"
+    depends_on:
+      - db
+    environment:
+      - MONGO_DB_URI=mongodb://db/microservices
+
+  videos:
+    build: './videos'
+    ports:
+      - "3003:3000"
+    depends_on:
+      - db
+    environment:
+      - MONGO_DB_URI=mongodb://db/microservices
+
+  db:
+    image: mongo
+    ports:
+      - "27017:27017"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:8080"
     volumes:
-      - mongodata:/data/db
-volumes:
-  mongodata:
+      - ./web/public:/srv/www/static
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+      - books
+      - search
+      - videos
