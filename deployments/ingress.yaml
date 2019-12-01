@@ -1,49 +1,14 @@
-# apiVersion: extensions/v1beta1
-# kind: Ingress
-# metadata:
-#   name: test-ingress
-#   annotations:
-#     nginx.ingress.kubernetes.io/ssl-redirect: \"false\"
-#     # nginx.ingress.kubernetes.io/rewrite-target: /
-#     # ingress.kubernetes.io/rewrite-target: /
-# spec:
-#   # serviceAccount: lb
-#   # backend:
-#   #   serviceName: default-http-backend
-#   #   servicePort: 80
-#   rules:
-#   # - host: myminikube.info
-#   #   http:
-#   #     paths:
-#   #     - path: /
-#   #       backend:
-#   #         serviceName: echoserver
-#   #         servicePort: 8080
-#   - http:
-#       paths:
-#         - path: /web
-#           backend:
-#             serviceName: web-service
-#             servicePort: 80
-
-
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: test-ingress
+  name: ingress-controller
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - http:
       paths:
-      - path: /testpath
-        backend:
-          serviceName: test
-          servicePort: 80
-  - http:
-      paths:
         - path: /web
           backend:
             serviceName: web-service
-            servicePort: 80
+            servicePort: 3000
