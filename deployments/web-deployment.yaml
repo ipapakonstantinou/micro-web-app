@@ -11,8 +11,8 @@ spec:
       port: 3000
       targetPort: 3000
       # targetPort: 3000
-      nodePort: 30000
-  type: NodePort
+  #     nodePort: 30000
+  # type: NodePort
 
 ---
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
@@ -33,6 +33,13 @@ spec:
     spec:
       containers:
       - name: web
-        image: ioannispapakonstantinou/microwebapp_web
+        image: web
+        imagePullPolicy: Never
+        # image: ioannispapakonstantinou/microwebapp_web
         ports:
         - containerPort: 3000
+        # env:
+        # - name: DB
+        #   value: "Hello from the environment"
+        # - name: DEMO_FAREWELL
+        #   value: "Such a sweet sorrow"
