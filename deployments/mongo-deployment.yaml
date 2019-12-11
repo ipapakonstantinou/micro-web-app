@@ -2,8 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  # namespace: pois
-  name: pois-mongo-cluster-ip-service
+  name: mongo
 spec:
   ports:
       # service port in cluster
@@ -11,46 +10,75 @@ spec:
       # port to contact inside container
       targetPort: 27017
   selector:
-    app: pois-mongo
-  type: ClusterIP
+    app: mongo
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pois-mongo-deployment
+  name: mongo-deployment
   # namespace: pois
 spec:
   selector:
     matchLabels:
-      app: pois-mongo
-  strategy:
-    type: Recreate
+      app: mongo
+  # strategy:
+  #   type: Recreate
   template:
     metadata:
       labels:
-        app: pois-mongo
+        app: mongo
     spec:
       containers:
         # by default, the image is pulled from docker hub
         - image: mongo
           name: mongo
+          env:
+            - name: MONGO_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: mealplan-config
+                  key: mongo_user
+            - name: MONGO_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mealplan-config
+                  key: mongo_password
+            - name: MGDATA
+              valueFrom:
+                configMapKeyRef:
+                  name: mealplan-config
+                  key: mgdata
           ports:
             - containerPort: 27017
+              name: mongo
           volumeMounts:
-            - name: mongo-persistent-storage
+            - name: mongo-storage
               mountPath: /data/db
       volumes:
-        - name: mongo-persistent-storage
-          persistentVolumeClaim:
-            claimName: pois-mongo-pv-claim
+        - name: mongo-storage
+          gcePersistentDisk:
+            fsType: ext4
+            pdName: mongo-disk
+
+
+
+      #
+      #     ports:
+      #       - containerPort: 27017
+      #     volumeMounts:
+      #       - name: mongo-persistent-storage
+      #         mountPath: /data/db
+      # volumes:
+      #   - name: mongo-persistent-storage
+      #     persistentVolumeClaim:
+      #       claimName: mongo-pv-claim
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pois-mongo-pv-claim
-  # namespace: pois
+  name: mongo-pv-claim
 spec:
   storageClassName: manual
   accessModes:
@@ -63,8 +91,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pois-mongo-pv-volume
-  # namespace: pois
+  name: mongo-pv-volume
   labels:
     type: local
 spec:
