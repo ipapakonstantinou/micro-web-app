@@ -1,14 +1,26 @@
-# FROM nginx
-# COPY ./web/public /srv/www/static
-# COPY ./default.conf /etc/nginx/conf.d/default.conf
-# EXPOSE 8080
-#
-# FROM node:latest
-# COPY ./web /src
-# WORKDIR /src
-# RUN npm install --production
-# EXPOSE 3000
-# CMD npm start
-#
-# FROM mongo
-# EXPOSE 27017
+FROM ubuntu
+
+# RUN apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make && \
+#    pip install docker-compose
+
+RUN mkdir -p /home/test
+
+RUN apt-get update && \
+      apt-get -y install sudo
+
+
+RUN sudo apt install docker.io -y
+RUN sudo apt install curl -y
+RUN sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+RUN sudo chmod +x /usr/local/bin/docker-compose
+RUN sudo apt install nano -y
+RUN sudo apt install nginx -y
+
+# RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+
+# USER docker
+
+
+COPY . ./home/test
+
+EXPOSE 8080
