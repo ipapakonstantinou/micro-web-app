@@ -1,36 +1,78 @@
-version: '3'
+version: '3.7'
 services:
   web:
-    build: './web'
-    ports:
-      - "3000:3000"
+    # build: './web'
+    # ports:
+    #   - "3000:3000"
+    image: ioannispapakonstantinou/micro_web
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
 
   search:
-    build: './search'
-    ports:
-      - "3001:3000"
+    # build: './search'
+    # ports:
+    #   - "3001:3000"
+    #   - "3005:3000"
+    image: ioannispapakonstantinou/micro_search
     depends_on:
       - db
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.80'
+        #   memory: 50M
+        # reservations:
+        #   cpus: '0.25'
+        #   memory: 20M
+
 
   books:
-    build: './books'
-    ports:
-      - "3002:3000"
+    # build: './books'
+    # ports:
+    #   - "3002:3000"
+    image: ioannispapakonstantinou/micro_books
     depends_on:
       - db
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.20'
+          # memory: 50M
+        # reservations:
+        #   cpus: '0.25'
+        #   memory: 20M
 
   videos:
-    build: './videos'
-    ports:
-      - "3003:3000"
+    # build: './videos'
+    image: ioannispapakonstantinou/micro_videos
+    # ports:
+    #   - "3003:3000"
     depends_on:
       - db
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
 
   db:
     image: mongo
@@ -49,3 +91,6 @@ services:
       - books
       - search
       - videos
+    deploy:
+      placement:
+        constraints: [node.role == manager]

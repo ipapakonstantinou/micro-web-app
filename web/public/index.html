@@ -33,6 +33,7 @@
   </form>
   <ul id="matches"></ul>
   <script>
+    const URL = "http://192.168.1.3:8080";
     const API = (() => {
       const makeSaveFunc = (selector, postNameFunc) => () => {
         try {
@@ -56,12 +57,14 @@
         });
       };
 
-      const postVideoName = makePostNameFunc("http://localhost:8080/api/v1/videos");
-      const postBookName = makePostNameFunc("http://localhost:8080/api/v1/books");
+
+      const postVideoName = makePostNameFunc(URL + "/api/v1/videos");
+      const postBookName = makePostNameFunc(URL + "/api/v1/books");
 
       const search = () => {
         try {
-          fetch("http://localhost:8080/api/v1/search")
+          // fetch("http://192.168.1.11:8080/api/v1/search")
+          fetch(URL + "/api/v1/search")
             .then(resp => resp.json())
             .then(results => {
               const ul = document.querySelector("#matches");
@@ -84,7 +87,6 @@
         }
         return false;
       };
-
       return {
         saveVideo: makeSaveFunc("#videoname", postVideoName),
         saveBook: makeSaveFunc("#bookname", postBookName),
