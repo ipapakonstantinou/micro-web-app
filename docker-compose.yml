@@ -1,35 +1,41 @@
-version: '3.7'
+version: '3.3'
 services:
   web:
     # build: './web'
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"
     image: ioannispapakonstantinou/micro_web
     deploy:
-      replicas: 1
+    # #   replicas: 1
       resources:
         limits:
           cpus: '0.10'
-          memory: 50M
-        reservations:
-          cpus: '0.25'
-          memory: 20M
+    #       memory: 50M
+    #     reservations:
+    #       cpus: '0.25'
+    #       memory: 20M
 
   search:
     # build: './search'
-    # ports:
-    #   - "3001:3000"
+    ports:
+      - "3001:3000"
     #   - "3005:3000"
     image: ioannispapakonstantinou/micro_search
     depends_on:
       - db
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
+    # logging:
+    #   driver: json-file
     deploy:
-      replicas: 1
+      # labels:
+      #   swarm.autoscaler: 'true'
+      #   swarm.autoscaler.maximum: '3'
+      #   swarm.autoscaler.minimum: '1'
+      # replicas: 3
       resources:
         limits:
-          cpus: '0.80'
+          cpus: '0.10'
         #   memory: 50M
         # reservations:
         #   cpus: '0.25'
@@ -38,15 +44,15 @@ services:
 
   books:
     # build: './books'
-    # ports:
-    #   - "3002:3000"
+    ports:
+      - "3002:3000"
     image: ioannispapakonstantinou/micro_books
     depends_on:
       - db
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
     deploy:
-      replicas: 1
+    #   replicas: 1
       resources:
         limits:
           cpus: '0.20'
@@ -65,19 +71,22 @@ services:
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
     deploy:
-      replicas: 1
+    #   replicas: 1
       resources:
         limits:
           cpus: '0.10'
-          memory: 50M
-        reservations:
-          cpus: '0.25'
-          memory: 20M
+    #       memory: 50M
+    #     reservations:
+    #       cpus: '0.25'
+    #       memory: 20M
 
   db:
     image: mongo
     ports:
       - "27017:27017"
+    # deploy:
+    #   placement:
+    #     constraints: [node.role == manager]
 
   nginx:
     image: nginx:latest
@@ -86,11 +95,21 @@ services:
     volumes:
       - ./web/public:/srv/www/static
       - ./default.conf:/etc/nginx/conf.d/default.conf
+    deploy:
+      replicas: 1
+      # labels:
+      #   swarm.autoscaler: 'true'
+      #   swarm.autoscaler.maximum: '3'
+      #   swarm.autoscaler.minimum: '1'
+      # resources:
+      #   limits:
+      #     cpus: '0.10'
     depends_on:
       - web
       - books
       - search
       - videos
-    deploy:
-      placement:
-        constraints: [node.role == manager]
+    # deploy:
+    #   replicas: 3
+    #   placement:
+    #     constraints: [node.role == manager]
