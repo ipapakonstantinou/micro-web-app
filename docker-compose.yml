@@ -6,7 +6,7 @@ services:
       - "3000:3000"
     image: ioannispapakonstantinou/micro_web
     deploy:
-    # #   replicas: 1
+      replicas: 1
       resources:
         limits:
           cpus: '0.10'
@@ -19,19 +19,12 @@ services:
     # build: './search'
     ports:
       - "3001:3000"
-    #   - "3005:3000"
     image: ioannispapakonstantinou/micro_search
     depends_on:
       - db
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
-    # logging:
-    #   driver: json-file
     deploy:
-      # labels:
-      #   swarm.autoscaler: 'true'
-      #   swarm.autoscaler.maximum: '3'
-      #   swarm.autoscaler.minimum: '1'
       # replicas: 3
       resources:
         limits:
@@ -52,7 +45,7 @@ services:
     environment:
       - MONGO_DB_URI=mongodb://db/microservices
     deploy:
-    #   replicas: 1
+      replicas: 1
       resources:
         limits:
           cpus: '0.20'
