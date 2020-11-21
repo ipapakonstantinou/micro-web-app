@@ -1,20 +1,38 @@
 import urllib.request
 import json
 import pandas as pd
+import os
+from dotenv import load_dotenv
 
-api_key = '9CLVUFCFCRRO3HKQ'
 
-from_currency = 'BTC'
-to_currency = 'USD'
+load_dotenv(dotenv_path='./.config/.env')
 
-symbol = 'BTC'
-market = 'EUR'
 
-def main():
+def load_config():
+    # If there is no env file ask for input
+    if not os.path.isfile('./.config/.env'):
+        api_key = input(str("Enter API Key: "))
+        from_currency = input(str("Enter from currency: "))
+        to_currency = input(str("Enter to currency: "))
+        symbol = input(str("Enter symbol: "))
+        market = input(str("Enter market: "))
+    else:
+        api_key = str(os.getenv('API_KEY'))
+        from_currency = str(os.getenv('FROM_CURRENCY'))
+        to_currency = str(os.getenv('TO_CURRENCY'))
+        symbol = str(os.getenv('SYMBOL'))
+        market = str(os.getenv('MARKET'))
 
     # Define Urls
     url_now = 'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=' + from_currency + '&to_currency=' + to_currency + '&apikey=' + api_key
     url_daily = 'https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=' + symbol + '&market=' + market + '&apikey=' + api_key
+
+    return url_now, url_daily
+
+def main():
+
+    # Load configurations
+    url_now, url_daily = load_config()
 
     # Request, Build and Display the Now Rate
     data_now = json.loads(urllib.request.urlopen(url_now).read())
