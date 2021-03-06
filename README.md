@@ -12,3 +12,8 @@
   wscat -c wss://stream.binance.com:9443/ws/btceur@trade
   Stream Name: <symbol>@kline_<interval>
   wscat -c wss://stream.binance.com:9443/ws/btceur@kline_1m
+
+# Requirements
+  python-binance
+  ta-talib
+  numpy
