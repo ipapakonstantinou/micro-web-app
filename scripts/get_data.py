@@ -1,18 +1,19 @@
 import sys
 import csv
-import numpy as np
 import talib
+import numpy as np
+import pandas as pd
 from binance.client import Client
 
 # Import the relevant scripts & config.py
-sys.path.append('./.config')
+sys.path.append('../.config')
 import config
 
 
 # Write CSV file
 def tocsv(csv_name, table):
 
-    csv_name = './exports/' + csv_name
+    csv_name = './data/' + csv_name
     csvfile = open(csv_name, 'w', newline='')
     writer = csv.writer(csvfile, delimiter=',')
 

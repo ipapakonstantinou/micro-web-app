@@ -5,7 +5,7 @@ import numpy as np
 np.set_printoptions(threshold=sys.maxsize)
 
 # Get data from CSV
-my_data = np.genfromtxt('./exports/201712-202001.csv', delimiter=',')
+my_data = np.genfromtxt('../data/201712-202001.csv', delimiter=',')
 
 # Only the close value
 close = my_data[:,4]
