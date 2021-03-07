@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<meta http-equiv="refresh" content="10">
+<!-- <meta http-equiv="refresh" content="30"> -->
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
@@ -14,10 +14,45 @@
 
     <div id='trades'></div>
 
+    <div style="border: solid gray 1px; padding: 20px; width: 600px; margin-top: 20px;">
+      <h3>Buy Crypto</h3>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div style="padding: 10px; margin-bottom: 10px; background: pink; border: solid red 1px; color: red;">
+          {% for message in messages %}
+            {{ message }}
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
+
+      <form action="/buy" method="post">
+        <input type="text" name="quantity" id="quantity" placeholder="e.g. 0.001">
+        <select id="symbol" name="symbol">
+          {% for symbol in symbols %}
+          <option>{{ symbol['symbol'] }}</option>
+          {% endfor %}
+        </select>
+        <input type="submit" name="buy" value="buy">
+      </form>
+
+    </div>
+
     <div id='balances'>
       <h2>Balances</h2>
-        {{ df_balances.to_html() | safe }}
-
+        <!-- {{ df_balances.to_html() | safe }} -->
+        <table>
+          {% for key, value in df_balances.iterrows() %}
+          <tr>
+            <td>
+              <option value="{{ value['asset'] }}">{{ value['asset'] }}</option>
+            </td>
+            <td>
+              <option value="{{ value['asset'] }}">{{ value['free'] }}</option>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
 
       <!-- <table>
         {% for balance in balances %}
