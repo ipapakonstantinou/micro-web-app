@@ -1,5 +1,11 @@
+# Balances Section
+
+  Get current value in BTC & EUR
+  Put total value in BTC & EUR
+  Put button go to transactions per symbol
 # ToDo
 
+  get all orders based on EUR & BTC pairs
   Save your portofolio locally
   get_all_tickers
   display amount in the relevant symbol (EUR, BTC, USD)

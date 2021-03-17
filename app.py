@@ -14,7 +14,7 @@ sys.path.append('./.config')
 sys.path.append('./scripts')
 # Import the relevant scripts & config.py
 import config
-from get_data import get_balances
+from get_data import get_balances, get_orders
 
 
 # Default parameters
@@ -33,9 +33,9 @@ client = Client(config.API_KEY, config.API_SECRET)
 @app.route('/')
 def index():
 
-    df_balances, symbols = get_balances()
+    df_balances, df_symbols, total_usdt, total_eur, total_btc = get_balances()
 
-    return render_template('index.html', title = title, df_balances = df_balances, symbols = symbols)
+    return render_template('index.html', title = title, df_balances = df_balances, df_symbols = df_symbols, total_usdt=total_usdt, total_eur = total_eur, total_btc = total_btc)
 
 @app.route('/buy', methods=['POST'])
 def buy():
@@ -78,3 +78,10 @@ def history():
         processed_candlesticks.append(candlestick)
 
     return jsonify(processed_candlesticks)
+
+@app.route('/portofolio')
+def portofolio():
+    get_orders()
+    print('Success')
+
+    return render_template('portofolio.html')

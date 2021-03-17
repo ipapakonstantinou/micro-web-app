@@ -28,10 +28,14 @@
 
       <form action="/buy" method="post">
         <input type="text" name="quantity" id="quantity" placeholder="e.g. 0.001">
+
         <select id="symbol" name="symbol">
-          {% for symbol in symbols %}
-          <option>{{ symbol['symbol'] }}</option>
+          {% for key, value in df_symbols.iterrows() %}
+            <option> <option value="{{ value['symbol'] }}">{{ value['symbol'] }}</option></option>
           {% endfor %}
+          <!-- {% for symbol in symbols %}
+          <option>{{ symbol['symbol'] }}</option>
+          {% endfor %} -->
         </select>
         <input type="submit" name="buy" value="buy">
       </form>
@@ -55,6 +59,13 @@
       <h2>Balances</h2>
         <!-- {{ df_balances.to_html() | safe }} -->
         <table>
+          <tr>
+            <td><strong>Asset</strong></td>
+            <td><strong>Free</strong></td>
+            <td><strong>USDT</strong></td>
+            <td><strong>EUR</strong></td>
+            <td><strong>BTC</strong></td>
+          </tr>
           {% for key, value in df_balances.iterrows() %}
           <tr>
             <td>
@@ -63,8 +74,26 @@
             <td>
               <option value="{{ value['asset'] }}">{{ value['free'] }}</option>
             </td>
+            <td>
+              <option value="{{ value['asset'] }}">{{ value['USDT'] }}</option>
+            </td>
+            <td>
+              <option value="{{ value['asset'] }}">{{ value['EUR'] }}</option>
+            </td>
+            <td>
+              <option value="{{ value['asset'] }}">{{ value['BTC'] }}</option>
+            </td>
           </tr>
           {% endfor %}
+          <tr>
+            <td><strong>Total</strong></td>
+            <td><strong></strong></td>
+            <td><strong>{{ total_usdt }}</strong></td>
+            <td><strong>{{ total_eur }}</strong></td>
+            <td><strong>{{ total_btc }}</strong></td>
+          </tr>
+
+
         </table>
 
       <!-- <table>
