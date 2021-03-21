@@ -22,20 +22,20 @@ from statsmodels.tsa.stattools import adfuller
 
 cdd = CryptoDataDownload()
 
-# data = cdd.fetch("binance", "USD", "BTC", "1h")
+data = cdd.fetch("Bitstamp", "USD", "BTC", "1h")
+
+
+# data = pd.read_csv('./data/klines/5m.csv')
+# data.columns =['unix', 'open', 'high', 'low', 'close', 'volume', 'Close time', 'Quote asset volume', 'Number of trades', 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Ignore']
+#
+# data['date'] = pd.to_datetime(data["unix"], unit='ms').dt.strftime('%Y-%m-%d %H:%M:%S')
+#
+# data = data[['date', 'unix', 'open', 'high', 'low', 'close', 'volume']]
+# data['unix'] = data['unix'].div(1000).astype('int64')
+#
+# data['diffed'] = data['close'] - data['close'].shift(1)
+# data['logged_and_diffed'] = np.log(data['close']) - np.log(data['close'].shift(1))
 # print(data)
-
-data = pd.read_csv('./data/klines/5m.csv')
-data.columns =['unix', 'open', 'high', 'low', 'close', 'volume', 'Close time', 'Quote asset volume', 'Number of trades', 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Ignore']
-
-data['date'] = pd.to_datetime(data["unix"], unit='ms').dt.strftime('%Y-%m-%d %H:%M:%S')
-
-data = data[['date', 'unix', 'open', 'high', 'low', 'close', 'volume']]
-data['unix'] = data['unix'].div(1000).astype('int64')
-
-data['diffed'] = data['close'] - data['close'].shift(1)
-data['logged_and_diffed'] = np.log(data['close']) - np.log(data['close'].shift(1))
-print(data)
 
 # data['logged_and_diffed'] = np.log(data['close']) - np.log(data['close']).shift(1)
 # result = adfuller(data['logged_and_diffed'].values[1:], autolag="AIC")
@@ -80,13 +80,13 @@ feed.compile()
 for i in range(5):
     print(feed.next())
 
-binance = Exchange("binance", service=execute_order)(
-    Stream.source(list(data["close"]), dtype="float").rename("EUR-BTC")
+bitstamp = Exchange("bitstamp", service=execute_order)(
+    Stream.source(list(data["close"]), dtype="float").rename("USD-BTC")
 )
 
-portfolio = Portfolio(EUR, [
-    Wallet(binance, 10000 * EUR),
-    Wallet(binance, 10 * BTC)
+portfolio = Portfolio(USD, [
+    Wallet(bitstamp, 10000 * USD),
+    Wallet(bitstamp, 1 * BTC)
 ])
 
 

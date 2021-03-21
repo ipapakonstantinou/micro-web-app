@@ -1,0 +1,9 @@
+python-binance
+TA-Lib
+numpy
+pandas
+websocket_client
+flask
+flask_cors
+backtrader
+matplotlib==3.2.2

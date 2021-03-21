@@ -14,7 +14,7 @@ from binance.client import Client
 # print(cwd)
 
 # Import the relevant scripts & config.py
-sys.path.append('../.config')
+sys.path.append('./.config')
 import config
 
 
@@ -96,9 +96,9 @@ def get_balances():
 # Function for getting klines
 def klines():
 
-    candlesticks = client.get_historical_klines("BTCUSDT", Client.KLINE_INTERVAL_5MINUTE, "1 Dec, 2016", "7 Mar, 2021")
+    candlesticks = client.get_historical_klines("BTCUSDT", Client.KLINE_INTERVAL_1MINUTE, "1 Dec, 2016", "20 Mar, 2021")
 
-    backtest_to_csv('5m.csv', candlesticks)
+    backtest_to_csv('1m.csv', candlesticks)
 
     df_candlesticks = pd.DataFrame.from_dict(candlesticks)
     df_candlesticks = df_candlesticks.iloc[:, : 6]
@@ -158,5 +158,6 @@ def testing():
 
 # Connect to the API
 client = Client(config.API_KEY, config.API_SECRET)
+klines()
 # get_orders()
 # testing()
