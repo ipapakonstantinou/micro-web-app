@@ -1,7 +1,9 @@
 # python -m virtualenv -p /usr/bin/python3.8 venv
 # source venv/bin/activate
+# pip install ipykernel
 # python -m ipykernel install --user --name=venv
 
+# %%
 
 import pandas as pd
 import numpy as np
@@ -14,7 +16,7 @@ from tensortrade.data.cdd import CryptoDataDownload
 from tensortrade.feed.core import Stream, DataFeed
 from tensortrade.oms.exchanges import Exchange
 from tensortrade.oms.services.execution.simulated import execute_order
-from tensortrade.oms.instruments import USD, BTC, ETH, EUR
+from tensortrade.oms.instruments import EUR, BTC, ETH, EUR
 from tensortrade.oms.wallets import Wallet, Portfolio
 from tensortrade.agents import DQNAgent
 from statsmodels.tsa.stattools import adfuller
@@ -22,17 +24,17 @@ from statsmodels.tsa.stattools import adfuller
 
 cdd = CryptoDataDownload()
 
-data = cdd.fetch("Bitstamp", "USD", "BTC", "1h")
+data = cdd.fetch("Bitstamp", "EUR", "BTC", "1h")
 
 
-# data = pd.read_csv('./data/klines/5m.csv')
+# data = pd.read_csv('./data/backtest/15m.csv')
 # data.columns =['unix', 'open', 'high', 'low', 'close', 'volume', 'Close time', 'Quote asset volume', 'Number of trades', 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Ignore']
-#
+
 # data['date'] = pd.to_datetime(data["unix"], unit='ms').dt.strftime('%Y-%m-%d %H:%M:%S')
-#
+
 # data = data[['date', 'unix', 'open', 'high', 'low', 'close', 'volume']]
 # data['unix'] = data['unix'].div(1000).astype('int64')
-#
+
 # data['diffed'] = data['close'] - data['close'].shift(1)
 # data['logged_and_diffed'] = np.log(data['close']) - np.log(data['close'].shift(1))
 # print(data)
@@ -70,7 +72,7 @@ cp = Stream.select(features, lambda s: s.name == "close")
 features = [
     cp.log().diff().rename("lr"),
     rsi(cp, period=20).rename("rsi"),
-    macd(cp, fast=10, slow=50, signal=5).rename("macd")
+    # macd(cp, fast=10, slow=50, signal=5).rename("macd")
 ]
 
 feed = DataFeed(features)
@@ -81,12 +83,12 @@ for i in range(5):
     print(feed.next())
 
 bitstamp = Exchange("bitstamp", service=execute_order)(
-    Stream.source(list(data["close"]), dtype="float").rename("USD-BTC")
+    Stream.source(list(data["close"]), dtype="float").rename("EUR-BTC")
 )
 
-portfolio = Portfolio(USD, [
-    Wallet(bitstamp, 10000 * USD),
-    Wallet(bitstamp, 1 * BTC)
+portfolio = Portfolio(EUR, [
+    Wallet(bitstamp, 1000 * EUR),
+    Wallet(bitstamp, 0.0025 * BTC)
 ])
 
 
@@ -115,7 +117,8 @@ env.observer.feed.next()
 
 agent = DQNAgent(env)
 
-agent.train(n_steps=200, n_episodes=2, save_path="agents/")
+agent.train(n_steps=10000, n_episodes=1,
+            save_path="agents/", render_interval=10000)
 
 
 print('Success')
