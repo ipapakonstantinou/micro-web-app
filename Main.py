@@ -175,7 +175,7 @@ def get_df_all_transactions(symbol):
 
     return df
 
-df = get_df_all_transactions('BTCEUR')
+df = get_df_all_transactions('ETHEUR')
 display(df.cost.sum())
 
 
