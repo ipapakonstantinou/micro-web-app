@@ -23,7 +23,7 @@ from binance.client import Client
 
 # Import the relevant scripts & config.py
 sys.path.append('./.config')
-import config
+from config import config
 
 API_KEY = config.API_KEY
 API_SECRET = config.API_SECRET
@@ -32,36 +32,55 @@ URI = config.URI
 # Get balances
 def get_balances(client):
 
-    # Get the list of all available symbols
-    exchange_info = client.get_exchange_info()
-    symbols = exchange_info['symbols']
-    df_symbols = pd.DataFrame.from_dict(symbols)
-    # print('\nsymbols\n', df_symbols)
 
     # Get all asset where you have value > 0
     account = client.get_account()
-    display(df_balances)
     balances = account['balances']
     df_balances = pd.DataFrame.from_dict(balances)
     df_balances = df_balances[['asset', 'free']].astype({'free': 'float'})
     df_balances = df_balances[df_balances.free != 0]
-    # print('\nbalances\n', df_balances)
 
-    # Get the assets that you own with the relevant values in EUR & BTC
-    # df_balances, total_usdt, total_eur, total_btc  = calculate_totals(df_balances)
-    display(df_balances)
+    return df_balances
 
-    info = client.get_account_snapshot(type='SPOT')
-    # display(info)
+def get_trading_symbols(df):
+    # Get coins into a list
+    coins_balances = df.asset.tolist()
 
+    trading_symbols = []
+    for c in range(len(coins_balances)):
+        if coins_balances[c] != 'BTC' and coins_balances[c] != 'EUR':  
+            trading_symbols.append(coins_balances[c] + 'BTC')
+            trading_symbols.append(coins_balances[c] + 'EUR')
 
-    # return df_balances, df_symbols, total_usdt, total_eur, total_btc
+    return trading_symbols
+
+def get_exchange_info(client):
+
+    trade_symbols = []
+    exchange_info = client.get_exchange_info()
+    pair_symbols = []
+    for i in range(len(exchange_info['symbols'])):
+        trade_symbols.append(exchange_info['symbols'][i]['symbol'])
+
+    return trade_symbols
 
 def get_data():
 
-    # api_key, api_secret = load_config()
     client = Client(config.API_KEY, config.API_SECRET)
-    get_balances(client)
+    
+    # Get current balances from spot
+    df_balances = get_balances(client)
+
+    trading_symbols = get_trading_symbols(df_balances)
+    print(trading_symbols)
+
+    for s in range(len(trading_symbols)):
+        print(trading_symbols[s])
+        df = get_df_all_transactions(trading_symbols[s])
+        display(df)
+
+    sys.exit()
+
 
 def get_timestamp_offset():
     url = "{}/api/v3/time".format(URI)
@@ -166,18 +185,21 @@ def get_all_transactions(symbol):
 def get_df_all_transactions(symbol):
 
     df = pd.json_normalize(get_all_transactions(symbol))
+    if df.empty or len(df) <= 1:
+        return df
 
     df['price'] = df['price'].astype(float)
     df['executedQty'] = df['executedQty'].astype(float)
     df['cost'] = df.price*df.executedQty
     df['cost']= np.where(df['side']=='SELL', -1*df['cost'], df['cost'])
     df = df.query('status == "FILLED"')
+    
+    display(df.cost.sum())
 
     return df
 
-df = get_df_all_transactions('ETHEUR')
-display(df.cost.sum())
 
+# df = get_df_all_transactions('BNBEUR')
+# display(df)
 
-
-# get_data()
+get_data()
