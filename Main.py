@@ -42,15 +42,22 @@ def get_balances(client):
 
     return df_balances
 
-def get_trading_symbols(df):
-    # Get coins into a list
-    coins_balances = df.asset.tolist()
+def get_trading_symbols(df, client):
 
-    trading_symbols = []
-    for c in range(len(coins_balances)):
-        if coins_balances[c] != 'BTC' and coins_balances[c] != 'EUR':  
-            trading_symbols.append(coins_balances[c] + 'BTC')
-            trading_symbols.append(coins_balances[c] + 'EUR')
+    # # Get coins into a list
+    # coins_balances = df.asset.tolist()
+    #
+    # trading_symbols = []
+    # for c in range(len(coins_balances)):
+    #     if coins_balances[c] != 'BTC' and coins_balances[c] != 'EUR':  
+    #         trading_symbols.append(coins_balances[c] + 'BTC')
+    #         trading_symbols.append(coins_balances[c] + 'EUR')
+
+    # trading_symbols.append('BTCEUR')
+
+
+    trading_symbols = get_exchange_info(client)
+    display(len(trading_symbols))
 
     return trading_symbols
 
@@ -62,7 +69,29 @@ def get_exchange_info(client):
     for i in range(len(exchange_info['symbols'])):
         trade_symbols.append(exchange_info['symbols'][i]['symbol'])
 
+    # trade_symbols.sort()
+
     return trade_symbols
+
+# Get weighted average for buy/sell price
+def get_weighted_average(df):
+
+    df['executedQty'] = df['executedQty'].astype(float)
+    df['cummulativeQuoteQty'] = df['cummulativeQuoteQty'].astype(float)
+    df_temp = df[['symbol', 'side', 'executedQty', 'cummulativeQuoteQty', 'cost']].copy()
+    df_mean = df_temp.groupby(by=['symbol', 'side']).sum()
+    df_mean['weightedAvg'] = df_mean.cummulativeQuoteQty / df_mean.executedQty
+    df_temp2 = df_temp.groupby(by=['symbol']).sum()
+    df_temp2['overallWeightedAvg'] = df_temp2.cost /df_temp2.executedQty
+    df_temp2['overallCost'] = df_temp2.cost
+
+    df_mean = df_mean.reset_index()
+    df_mean = df_mean.merge(df_temp2[['overallCost', 'overallWeightedAvg']], how = 'inner', on = 'symbol')
+
+    display(df_mean)
+    df_mean.to_csv('./data_output/indexes.csv')
+    
+    return df_mean
 
 def get_data():
 
@@ -71,16 +100,25 @@ def get_data():
     # Get current balances from spot
     df_balances = get_balances(client)
 
-    trading_symbols = get_trading_symbols(df_balances)
+    trading_symbols = get_trading_symbols(df_balances, client)
     print(trading_symbols)
 
+    df = pd.DataFrame()
     for s in range(len(trading_symbols)):
         print(trading_symbols[s])
-        df = get_df_all_transactions(trading_symbols[s])
-        display(df)
+        df_temp = get_df_all_transactions(trading_symbols[s])
+        df = df.append(df_temp, ignore_index=True)
+        if s % 10 == 0:
+            print(s, 'out of', len(trading_symbols))
 
-    sys.exit()
+    df.dropna()
+    # df = df[df.code != -1121]
+    df.to_csv('./data_output/trades.csv')
 
+    df_index = get_weighted_average(df)
+
+    return df, df_index
+    
 
 def get_timestamp_offset():
     url = "{}/api/v3/time".format(URI)
@@ -95,7 +133,6 @@ def generate_signature(query_string):
     m = hmac.new(API_SECRET.encode("utf-8"),
                  query_string.encode("utf-8"), hashlib.sha256)
     return m.hexdigest()
-
 
 def get_all_flexible_savings_balance():
     timestamp = int(time.time() * 1000 + get_timestamp_offset())
@@ -121,7 +158,6 @@ def get_flexible_savings_balance(asset):
 
     url = "{}/sapi/v1/lending/daily/token/position?{}&signature={}".format(
         URI, query_string, signature)
-    print(url)
 
     payload = {}
     headers = {
@@ -188,9 +224,8 @@ def get_df_all_transactions(symbol):
     if df.empty or len(df) <= 1:
         return df
 
-    df['price'] = df['price'].astype(float)
-    df['executedQty'] = df['executedQty'].astype(float)
-    df['cost'] = df.price*df.executedQty
+    df['cummulativeQuoteQty'] = df['cummulativeQuoteQty'].astype(float)
+    df['cost'] = df.cummulativeQuoteQty
     df['cost']= np.where(df['side']=='SELL', -1*df['cost'], df['cost'])
     df = df.query('status == "FILLED"')
     
@@ -198,8 +233,70 @@ def get_df_all_transactions(symbol):
 
     return df
 
+def get_deposit_history():
+    timestamp = int(time.time() * 1000 + get_timestamp_offset())
+    query_string = "transactionType={}&beginTime={}&limit={}&timestamp={}".format(0, 1514764800000,1000, timestamp)
+    signature = generate_signature(query_string)
 
-# df = get_df_all_transactions('BNBEUR')
-# display(df)
+    url = "{}/sapi/v1/fiat/orders?{}&signature={}".format(URI, query_string, signature)
 
-get_data()
+    payload = {}
+    headers = {
+        "Content-Type": "application/json",
+        "X-MBX-APIKEY": API_KEY
+    }
+
+    df = pd.DataFrame(pd.json_normalize(json.loads(requests.request("GET", url, headers=headers, data=payload).text)).data[0])
+    
+    df['amount'] = df['amount'].astype(float)
+
+    return df
+
+def get_price_ticket():
+    timestamp = int(time.time() * 1000 + get_timestamp_offset())
+
+    url = "{}/api/v3/ticker/price?".format(URI)
+
+    payload = {}
+    headers = {
+        "Content-Type": "application/json",
+        "X-MBX-APIKEY": API_KEY
+    }
+
+    df = pd.DataFrame(pd.json_normalize(json.loads(requests.request("GET", url, headers=headers, data=payload).text)))
+
+    return df
+
+# client = Client(config.API_KEY, config.API_SECRET)
+
+# get_all_flexible_savings_balance()
+# get_flexible_savings_balance('BUSD')
+
+
+# # Get current balances from spot
+# df_balances = get_balances(client)
+# display(df_balances)
+
+df_deposit = get_deposit_history()
+display(df_deposit.amount.sum())
+
+df_price = get_price_ticket()
+
+df_trades = pd.read_csv('./data_output/trades.csv')
+df_indexes = pd.read_csv('./data_output/indexes.csv')
+
+df_trades = df_trades.merge(df_price, how = 'inner', on = 'symbol')
+df_indexes = df_indexes.merge(df_price, how = 'inner', on = 'symbol')
+
+# df_trades = df_trades.price * df_trades.cost
+
+
+df_indexes.to_csv('./data_output/indexes.csv')
+display(df_trades, df_indexes)
+
+display
+
+
+
+
+
