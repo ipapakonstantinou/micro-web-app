@@ -2,6 +2,9 @@
 
 #TODO
 '''
+    Define universal structures
+    Create new project or fix this one
+        Find a name
     Make scripts as generic as possible
     Find out if there is a liquidation history
     Use api myTrades to work as well as it does for the orders
@@ -9,6 +12,7 @@
     Include in the balances the asset dividend
     Use get_swap in combination with the myTrades
     Found out which API calls have limits and adjust the output
+    Find BTCEUR for each time in order to calcualte the cost in EUR when the pair is e.g. DOTBTC
 '''
 
 '''
@@ -184,6 +188,8 @@ def get_balance_coins(df_indexes, df_exchange_info):
 
     return df_balance
 
+# df_balances = get_balances()
+# display(df_balances)
 
 # df_dividend = get_asset_dividend()
 # display(df_dividend.query('asset == "SXP"'))
@@ -193,13 +199,10 @@ def get_balance_coins(df_indexes, df_exchange_info):
 
 # df_trades = pd.read_csv('./data_output/trades.csv')
 # df_indexes = pd.read_csv('./data_output/indexes.csv')
-# df_balances = get_balances()
-# display(df_balances)
 # display(get_flexible_savings_balance('BNB'))
 
-# sys.exit()
-df_bswap_records = get_liquidityOps()
-df_bswap_records.to_csv('./data_output/bswap_records.csv')
+# df_bswap_records = get_liquidityOps()
+# df_bswap_records.to_csv('./data_output/bswap_records.csv')
 df_trades, df_indexes, df_exchange_info = get_data()
 
 df_price = get_price_ticket()
