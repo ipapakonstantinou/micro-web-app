@@ -89,7 +89,7 @@ def get_df_all_transactions(symbol):
     df = pd.json_normalize(get_all_transactions(symbol))
     if df.empty:
         return df
-    df = df.query('status != "CANCELED"')
+    df = df.query('status == "FILLED"')
 
     df['cummulativeQuoteQty'] = df['cummulativeQuoteQty'].astype(float)
     df['cost'] = np.where(df['side']=='SELL', -1*df['cummulativeQuoteQty'], df['cummulativeQuoteQty'])
