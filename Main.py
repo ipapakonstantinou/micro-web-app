@@ -111,7 +111,6 @@ def get_df_all_trades(symbol):
     display(df)
     sys.exit()
 
-
     if df.empty:
         return df
 
