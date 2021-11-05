@@ -60,6 +60,7 @@ def get_trading_symbols():
         print('No symbols found in config file')
         sys.exit()
 
+
     df_exchage_info = pd.DataFrame.from_dict(get_exchange_info()['symbols'])
 
     return trading_symbols, df_exchage_info
